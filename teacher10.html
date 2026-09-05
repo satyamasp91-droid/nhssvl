@@ -1,0 +1,620 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Special Surprise for Ma'am ✨</title>
+  
+  <!-- Canvas Confetti & GSAP -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@300;400;600;800&family=Playfair+Display:ital,wght@1,600&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #030308;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .aurora {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.3), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.3), transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.25), transparent 50%);
+      filter: blur(50px);
+      animation: moveAurora 10s ease-in-out infinite alternate;
+      transition: all 1s ease;
+    }
+
+    .aurora.active {
+      filter: blur(40px);
+      opacity: 0.95;
+      background: 
+        radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.45), transparent 45%),
+        radial-gradient(circle at 70% 70%, rgba(236, 72, 153, 0.5), transparent 45%),
+        radial-gradient(circle at 50% 20%, rgba(168, 85, 247, 0.45), transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.45), transparent 50%);
+      animation: moveAuroraActive 5s ease-in-out infinite alternate;
+    }
+
+    @keyframes moveAurora {
+      0% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1.2) rotate(10deg); }
+    }
+
+    @keyframes moveAuroraActive {
+      0% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.3) rotate(15deg); }
+      100% { transform: scale(1.1) rotate(-10deg); }
+    }
+
+    #bgCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .container {
+      max-width: 440px;
+      width: 100%;
+      z-index: 10;
+      perspective: 1000px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-radius: 24px;
+      padding: 32px 20px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9),
+                  inset 0 0 1px 1px rgba(255, 255, 255, 0.25);
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    .gift-box {
+      font-size: 4.2rem;
+      margin-bottom: 12px;
+      cursor: pointer;
+      display: inline-block;
+      filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.8));
+      animation: floatGift 3s ease-in-out infinite;
+    }
+
+    @keyframes floatGift {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(4deg); }
+    }
+
+    .title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.75rem;
+      color: #fff;
+      margin-bottom: 8px;
+      background: linear-gradient(to right, #fff, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.88rem;
+      margin-bottom: 22px;
+      font-weight: 300;
+    }
+
+    .open-btn {
+      background: linear-gradient(90deg, #ec4899, #a855f7, #06b6d4);
+      background-size: 200% auto;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(168, 85, 247, 0.5);
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .open-btn:hover {
+      background-position: right center;
+      transform: scale(1.05);
+    }
+
+    #slideQuote, #slidePuzzle, #slideFinal {
+      display: none;
+      opacity: 0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.15);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      margin-bottom: 16px;
+    }
+
+    /* QUOTE SECTION STYLES */
+    .quote-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 16px;
+      padding: 24px 20px;
+      margin-top: 15px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .quote-box::before {
+      content: '"';
+      position: absolute;
+      top: -5px;
+      left: 15px;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      color: rgba(251, 191, 36, 0.3);
+      line-height: 1;
+    }
+
+    .quote-text {
+      color: #f8fafc;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* PUZZLE STYLES */
+    .puzzle-board {
+      width: 240px;
+      height: 240px;
+      margin: 0 auto 16px auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 3px;
+      border: 3px solid #fbbf24;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+    }
+
+    .tile {
+      width: 100%;
+      height: 100%;
+      background-image: url('9.jpeg');
+      background-size: 240px 240px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s ease-in-out;
+    }
+
+    .tile.empty {
+      background: rgba(15, 23, 42, 0.9);
+      cursor: default;
+    }
+
+    .crown-icon {
+      font-size: 2.5rem;
+      margin-bottom: 5px;
+      display: block;
+      filter: drop-shadow(0 0 15px #fbbf24);
+      animation: pulseCrown 2s infinite alternate;
+    }
+
+    @keyframes pulseCrown {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    .grand-header {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .photo-frame {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 16px auto;
+      border: 3px solid #fbbf24;
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.6), 0 10px 20px rgba(0,0,0,0.5);
+      position: relative;
+      background: #1e1b4b;
+    }
+
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 32%;
+      filter: contrast(115%) brightness(108%) saturate(110%);
+      transform: scale(1.35);
+    }
+
+    .message-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 70px;
+    }
+
+    .message-text {
+      color: #f1f5f9;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .particle-down {
+      position: fixed;
+      font-size: 4.5rem;
+      pointer-events: none;
+      z-index: 9999;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+      animation: fallDownward 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    @keyframes fallDownward {
+      0% {
+        opacity: 0;
+        transform: translateY(-120px) scale(0.6) rotate(0deg);
+      }
+      15% {
+        opacity: 1;
+        transform: translateY(0px) scale(1) rotate(-8deg);
+      }
+      85% { opacity: 1; }
+      100% {
+        opacity: 0;
+        transform: translateY(105vh) scale(1.1) rotate(15deg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="aurora" id="auroraBg"></div>
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="container">
+    <div class="card" id="tiltCard">
+      
+      <!-- START PAGE -->
+      <div id="page1">
+        <div class="gift-box" onclick="startAutomatedSurprise(event)">🎁</div>
+        <h1 class="title">A Surprise for Ma'am</h1>
+        <p class="subtitle">Specially created for the best teacher!</p>
+        <button class="open-btn" onclick="startAutomatedSurprise(event)">Tap To Open ✨</button>
+      </div>
+
+      <!-- SLIDE 2: INTERACTIVE QUOTE -->
+      <div id="slideQuote">
+        <span class="status-badge">✨ A Special Thought</span>
+        <h2 class="title" style="font-size: 1.4rem; margin-bottom: 20px;">The Biggest Reason...</h2>
+        
+        <!-- Button to reveal quote -->
+        <button id="revealQuoteBtn" class="open-btn" onclick="revealQuote()">Tap to Reveal 💖</button>
+        
+        <!-- Hidden quote box -->
+        <div id="quoteContainer" style="display: none; opacity: 0;">
+          <div class="quote-box">
+            <p class="quote-text">"A truly great teacher is hard to find, difficult to part with, and impossible to forget. Thank you for being that teacher."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: PUZZLE -->
+      <div id="slidePuzzle">
+        <span class="status-badge">🧩 Assembling Memory...</span>
+        <div class="puzzle-board" id="puzzleBoard"></div>
+      </div>
+
+      <!-- FINAL REWARD PAGE -->
+      <div id="slideFinal">
+        <span class="crown-icon">👑</span>
+        <h2 class="grand-header">You Are The Best! ❤️</h2>
+
+        <div class="photo-frame">
+          <img src="9.jpeg" alt="Teachers Photo">
+        </div>
+
+        <div class="message-box">
+          <p class="message-text" id="typewriterText"></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const card = document.getElementById('tiltCard');
+    document.addEventListener('mousemove', (e) => {
+      const xAxis = (window.innerWidth / 2 - e.pageX) / 35;
+      const yAxis = (window.innerHeight / 2 - e.pageY) / 35;
+      card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+    });
+
+    let puzzleTimer;
+
+    // STEP 1: Open Gift -> Show "Why you're the best" page
+    function startAutomatedSurprise(e) {
+      document.getElementById('auroraBg').classList.add('active');
+      initBackgroundParticles();
+
+      const p1 = document.getElementById('page1');
+      const sQuote = document.getElementById('slideQuote');
+
+      gsap.to(p1, {
+        opacity: 0, scale: 0.85, duration: 0.35,
+        onComplete: () => {
+          p1.style.display = 'none';
+          sQuote.style.display = 'block';
+          gsap.fromTo(sQuote, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.4 });
+        }
+      });
+    }
+
+    // STEP 2: Reveal the Quote when clicked
+    function revealQuote() {
+      const btn = document.getElementById('revealQuoteBtn');
+      const quoteBox = document.getElementById('quoteContainer');
+      
+      gsap.to(btn, {
+        opacity: 0, scale: 0.8, duration: 0.3,
+        onComplete: () => {
+          btn.style.display = 'none';
+          quoteBox.style.display = 'block';
+          gsap.fromTo(quoteBox, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.5)" });
+          
+          // Wait 4 seconds for them to read the quote, then automatically go to puzzle
+          setTimeout(showPuzzleSlide, 4000);
+        }
+      });
+    }
+
+    // STEP 3: Auto-transition to Puzzle
+    function showPuzzleSlide() {
+      const sQuote = document.getElementById('slideQuote');
+      const sPuzzle = document.getElementById('slidePuzzle');
+
+      gsap.to(sQuote, {
+        opacity: 0, scale: 0.85, duration: 0.35,
+        onComplete: () => {
+          sQuote.style.display = 'none';
+          sPuzzle.style.display = 'block';
+          gsap.fromTo(sPuzzle, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.4 });
+          
+          initPuzzle();
+
+          // Auto-solve puzzle after 10 seconds
+          puzzleTimer = setTimeout(() => {
+            solvePuzzleAuto();
+          }, 10000);
+        }
+      });
+    }
+
+    /* Puzzle Logic */
+    let boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    const winningState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+    function initPuzzle() {
+      boardState = [0, 1, 2, 3, 5, 8, 6, 4, 7];
+      renderPuzzle();
+    }
+
+    function renderPuzzle() {
+      const board = document.getElementById('puzzleBoard');
+      board.innerHTML = '';
+
+      boardState.forEach((tileIdx, currentPos) => {
+        const tile = document.createElement('div');
+        tile.classList.add('tile');
+
+        if (tileIdx === 8) {
+          tile.classList.add('empty');
+        } else {
+          const row = Math.floor(tileIdx / 3);
+          const col = tileIdx % 3;
+          tile.style.backgroundPosition = `-${col * 80}px -${row * 80}px`;
+          tile.onclick = () => moveTile(currentPos);
+        }
+        board.appendChild(tile);
+      });
+    }
+
+    function moveTile(pos) {
+      const emptyPos = boardState.indexOf(8);
+      const validMoves = [
+        pos - 1 === emptyPos && pos % 3 !== 0,
+        pos + 1 === emptyPos && pos % 3 !== 2,
+        pos - 3 === emptyPos,
+        pos + 3 === emptyPos
+      ];
+
+      if (validMoves.some(Boolean)) {
+        [boardState[pos], boardState[emptyPos]] = [boardState[emptyPos], boardState[pos]];
+        renderPuzzle();
+        
+        if (boardState.every((val, index) => val === winningState[index])) {
+          clearTimeout(puzzleTimer);
+          setTimeout(showFinalSlide, 400);
+        }
+      }
+    }
+
+    function solvePuzzleAuto() {
+      boardState = [...winningState];
+      renderPuzzle();
+      setTimeout(showFinalSlide, 600);
+    }
+
+    // STEP 4: Final Slide & Celebrations
+    function showFinalSlide() {
+      const sPuzzle = document.getElementById('slidePuzzle');
+      const sFinal = document.getElementById('slideFinal');
+
+      gsap.to(sPuzzle, {
+        opacity: 0, scale: 0.85, duration: 0.35,
+        onComplete: () => {
+          sPuzzle.style.display = 'none';
+          sFinal.style.display = 'block';
+          gsap.fromTo(sFinal, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" });
+          
+          startTypewriter();
+          startAutomatedCelebrationIntervals();
+        }
+      });
+    }
+
+    const fullText = "Because of your guidance, wisdom, and kindness, every challenge becomes easier and every goal feels achievable. Thank you for being such an extraordinary mentor!";
+    let index = 0;
+
+    function startTypewriter() {
+      const textElem = document.getElementById('typewriterText');
+      if (index < fullText.length) {
+        textElem.innerHTML += fullText.charAt(index);
+        index++;
+        setTimeout(startTypewriter, 30);
+      }
+    }
+
+    function startAutomatedCelebrationIntervals() {
+      launchFireworks();
+      spawnParticlesDownward();
+
+      setInterval(() => {
+        launchFireworks();
+      }, 4500);
+
+      setInterval(() => {
+        spawnParticlesDownward();
+      }, 6000);
+    }
+
+    function spawnParticlesDownward() {
+      const emojis = ['🎈', '🎈', '✨', '💖', '🎓', '🌟', '🌸'];
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.classList.add('particle-down');
+          particle.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+          particle.style.left = (Math.random() * (window.innerWidth - 80)) + 'px';
+          particle.style.top = '-50px';
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 4000);
+        }, i * 160);
+      }
+    }
+
+    function launchFireworks() {
+      const confettiFunc = window.confetti || confetti;
+      if (typeof confettiFunc !== 'function') return;
+
+      var duration = 2.5 * 1000;
+      var end = Date.now() + duration;
+
+      (function frame() {
+        confettiFunc({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0, y: 0.7 }, colors: ['#fbbf24', '#ec4899', '#06b6d4', '#a855f7'] });
+        confettiFunc({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1, y: 0.7 }, colors: ['#fbbf24', '#ec4899', '#06b6d4', '#a855f7'] });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      }());
+    }
+
+    function initBackgroundParticles() {
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particlesArray = [];
+      const colors = ['#fbbf24', '#ec4899', '#06b6d4', '#a855f7', '#ffffff'];
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = canvas.height + Math.random() * 100;
+          this.size = Math.random() * 4 + 1;
+          this.speedY = Math.random() * 1.5 + 0.5;
+          this.speedX = Math.random() * 1 - 0.5;
+          this.color = colors[Math.floor(Math.random() * colors.length)];
+          this.opacity = Math.random() * 0.7 + 0.3;
+        }
+
+        update() {
+          this.y -= this.speedY;
+          this.x += this.speedX;
+          if (this.y < -10) {
+            this.y = canvas.height + 10;
+            this.x = Math.random() * canvas.width;
+          }
+        }
+
+        draw() {
+          ctx.globalAlpha = this.opacity;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = this.color;
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < 45; i++) particlesArray.push(new Particle());
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particlesArray.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+  </script>
+</body>
+</html>
