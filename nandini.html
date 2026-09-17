@@ -1,0 +1,837 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Magical Journey for Nandini ✨</title>
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Caveat:wght@700&family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+
+            /* ========================================================
+               BACKGROUND CONFIGURATION 
+               ======================================================== */
+            
+            /* OPTION 1: Deep Magical Midnight Gradient (Active Default) */
+            background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #050a14 60%, #020408 100%);
+            
+            /* OPTION 2: Custom Image Background (Uncomment below to use image URL) */
+            /* background: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed; */
+
+            /* OPTION 3: Warm Romantic Pink/Purple Gradient (Uncomment below to use) */
+            /* background: radial-gradient(circle at 50% 50%, #2b102f 0%, #150819 60%, #09030c 100%); */
+
+            background-attachment: fixed;
+        }
+
+        /* FLOATING AMBIENT GLOW ORBS IN BACKGROUND */
+        .bg-glow-1, .bg-glow-2 {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatGlow 12s infinite ease-in-out alternate;
+        }
+
+        .bg-glow-1 {
+            width: 350px;
+            height: 350px;
+            background: #d4af37;
+            top: 10%;
+            left: 15%;
+        }
+
+        .bg-glow-2 {
+            width: 450px;
+            height: 450px;
+            background: #ff4e50;
+            bottom: 10%;
+            right: 10%;
+            animation-delay: -6s;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 40px) scale(1.2); }
+        }
+
+        /* --- STAGE 1: UNLOCK SCREEN --- */
+        #stage-intro {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(16, 28, 51, 0.95) 0%, rgba(3, 7, 16, 0.98) 100%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        #stage-intro.fade-out {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: #f3e5ab;
+            margin-bottom: 8px;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .hero-sub {
+            font-size: 0.85rem;
+            color: #8c9ba5;
+            margin-bottom: 30px;
+        }
+
+        .rune-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 320px;
+        }
+
+        .rune-stone {
+            width: 38px;
+            height: 50px;
+            background: linear-gradient(145deg, rgba(19, 34, 56, 0.8), rgba(10, 17, 29, 0.9));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            color: #d4af37;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .rune-stone.active {
+            background: linear-gradient(135deg, #d4af37, #f3e5ab);
+            color: #050a14;
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+        }
+
+        .launch-btn {
+            background: linear-gradient(90deg, #d4af37, #f3e5ab);
+            color: #050a14;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .launch-btn.ready {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* --- STAGE 2: HORIZONTAL MAP JOURNEY --- */
+        #stage-map {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        #stage-map.active {
+            display: flex;
+        }
+
+        .header-banner {
+            position: absolute;
+            top: 30px;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .header-banner h2 {
+            font-family: 'Cinzel', serif;
+            color: #f3e5ab;
+            font-size: 1.3rem;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .header-banner p {
+            font-size: 0.8rem;
+            color: #8c9ba5;
+            margin-top: 4px;
+        }
+
+        /* SCROLLABLE HORIZONTAL ROAD CONTAINER */
+        .map-scroll-area {
+            width: 100%;
+            height: 420px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            display: flex;
+            align-items: center;
+            scroll-behavior: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 40px;
+        }
+
+        .map-scroll-area::-webkit-scrollbar {
+            height: 6px;
+        }
+        .map-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+        }
+
+        .road-container {
+            position: relative;
+            width: 1300px;
+            height: 300px;
+            flex-shrink: 0;
+        }
+
+        /* SVG Curved Horizontal Path */
+        .road-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+
+        /* SMOOTH MOVING CAR ON ROAD */
+        #journey-car {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            z-index: 20;
+            margin-left: -22px;
+            margin-top: -22px;
+            font-size: 2.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+            pointer-events: none;
+            transform: scaleX(-1);
+            transform-origin: center center;
+            transition: none;
+        }
+
+        /* MAP LOCATION PINS WITH PHOTO PREVIEW */
+        .map-pin-wrapper {
+            position: absolute;
+            transform: translate(-50%, -100%);
+            cursor: pointer;
+            text-align: center;
+            z-index: 5;
+            transition: transform 0.3s ease, filter 0.3s ease, opacity 0.3s ease;
+        }
+
+        .map-pin-wrapper.locked {
+            opacity: 0.35;
+            filter: grayscale(1);
+            cursor: not-allowed;
+        }
+
+        .map-pin-wrapper:not(.locked):active {
+            transform: translate(-50%, -100%) scale(0.9);
+        }
+
+        .map-pin {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #d4af37, #f3e5ab);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+            border: 2px solid #fff;
+            animation: bouncePin 2s infinite ease-in-out;
+            padding: 3px;
+        }
+
+        @keyframes bouncePin {
+            0%, 100% { transform: rotate(-45deg) translateY(0); }
+            50% { transform: rotate(-45deg) translateY(-8px); }
+        }
+
+        .pin-photo {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            transform: rotate(45deg);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .pin-label {
+            margin-top: 10px;
+            background: rgba(15, 28, 51, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: #f3e5ab;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Pin Positions along the Horizontal Road */
+        .pin-1 { top: 90px; left: 100px; }
+        .pin-2 { top: 220px; left: 400px; }
+        .pin-3 { top: 80px; left: 700px; }
+        .pin-4 { top: 210px; left: 1000px; }
+        .pin-5 { top: 100px; left: 1220px; }
+
+        /* --- POPUP CARD MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(3, 7, 16, 0.88);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 90%;
+            max-width: 340px;
+            background: #0e192b;
+            border: 2px solid #d4af37;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+            text-align: center;
+            transform: scale(0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-card img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 15px;
+        }
+
+        .modal-card .card-title {
+            font-family: 'Cinzel', serif;
+            color: #d4af37;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .modal-card .card-text {
+            font-family: 'Caveat', cursive;
+            font-size: 1.4rem;
+            color: #f3e5ab;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: linear-gradient(90deg, #d4af37, #f3e5ab);
+            color: #050a14;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            width: 100%;
+        }
+
+        .replay-btn {
+            background: transparent;
+            color: #f3e5ab;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: none;
+            width: 100%;
+        }
+
+        /* FLOATING AUDIO CONTROL */
+        .audio-pill {
+            position: fixed;
+            top: 20px; right: 20px;
+            z-index: 150;
+            background: rgba(16, 28, 51, 0.7);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: #d4af37;
+            font-size: 0.8rem;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 999;
+            animation: burst 0.8s ease-out forwards;
+        }
+
+        @keyframes burst {
+            0% { transform: scale(1) translate(0, 0); opacity: 1; }
+            100% { transform: scale(0) translate(var(--dx), var(--dy)); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glowing Background Elements -->
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <!-- Audio Control -->
+    <audio id="bgSong" loop>
+        <source src="nandini.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="audio-pill" onclick="toggleAudio()">
+        <span id="audioIcon">🎵</span>
+        <span id="audioLabel">Music</span>
+    </div>
+
+    <!-- STAGE 1: NAME UNLOCK -->
+    <div id="stage-intro">
+        <h1 class="hero-title">Unlock a Special Gift for u </h1>
+        <p class="hero-sub">Tap all 7 crystals to align the stars ✨</p>
+
+        <div class="rune-container">
+            <div class="rune-stone" onclick="unlockRune(this, 'N')">✦</div>
+            <div class="rune-stone" onclick="unlockRune(this, 'A')">✦</div>
+            <div class="rune-stone" onclick="unlockRune(this, 'N')">✦</div>
+            <div class="rune-stone" onclick="unlockRune(this, 'D')">✦</div>
+            <div class="rune-stone" onclick="unlockRune(this, 'I')">✦</div>
+            <div class="rune-stone" onclick="unlockRune(this, 'N')">✦</div>
+            <div class="rune-stone" onclick="unlockRune(this, 'I')">✦</div>
+        </div>
+
+        <button class="launch-btn" id="launchBtn" onclick="startJourney()">Enter Your Memories 💖</button>
+    </div>
+
+    <!-- STAGE 2: HORIZONTAL MAP JOURNEY -->
+    <div id="stage-map">
+        <div class="header-banner">
+            <h2>Nandini's Memory Road 🗺️</h2>
+            <p>Tap photos to drive along the magic road!</p>
+        </div>
+
+        <div class="map-scroll-area" id="scrollArea">
+            <div class="road-container">
+                <!-- Curved Horizontal SVG Road -->
+                <svg class="road-svg" viewBox="0 0 1300 300" preserveAspectRatio="none">
+                    <path id="roadPath" 
+                          d="M 100 90 C 250 20, 250 220, 400 220 C 550 220, 550 80, 700 80 C 850 80, 850 210, 1000 210 C 1120 210, 1120 100, 1220 100" 
+                          fill="none" 
+                          stroke="rgba(212, 175, 55, 0.25)" 
+                          stroke-width="14" 
+                          stroke-linecap="round" />
+                    <path d="M 100 90 C 250 20, 250 220, 400 220 C 550 220, 550 80, 700 80 C 850 80, 850 210, 1000 210 C 1120 210, 1120 100, 1220 100" 
+                          fill="none" 
+                          stroke="#d4af37" 
+                          stroke-width="3" 
+                          stroke-dasharray="8 8" 
+                          stroke-linecap="round" />
+                </svg>
+
+                <!-- MOVING CAR -->
+                <div id="journey-car">🏎️</div>
+
+                <!-- ROAD LOCATION PINS WITH PHOTO PREVIEWS -->
+                <div class="map-pin-wrapper pin-1" id="pin-1" onclick="handlePinTap(1, event)">
+                    <div class="map-pin">
+                        <img src="3.png" class="pin-photo" alt="Memory 1">
+                    </div>
+                    <div class="pin-label">Start Point 📍</div>
+                </div>
+
+                <div class="map-pin-wrapper pin-2 locked" id="pin-2" onclick="handlePinTap(2, event)">
+                    <div class="map-pin">
+                        <img src="1.jpeg" class="pin-photo" alt="Memory 2">
+                    </div>
+                    <div class="pin-label">Adventure Stop</div>
+                </div>
+
+                <div class="map-pin-wrapper pin-3 locked" id="pin-3" onclick="handlePinTap(3, event)">
+                    <div class="map-pin">
+                        <img src="21.jpeg" class="pin-photo" alt="Memory 3">
+                    </div>
+                    <div class="pin-label">Joyful Moment</div>
+                </div>
+
+                <div class="map-pin-wrapper pin-4 locked" id="pin-4" onclick="handlePinTap(4, event)">
+                    <div class="map-pin">
+                        <img src="4.jpeg" class="pin-photo" alt="Memory 4">
+                    </div>
+                    <div class="pin-label">Surprise Stop</div>
+                </div>
+
+                <div class="map-pin-wrapper pin-5 locked" id="pin-5" onclick="handlePinTap(5, event)">
+                    <div class="map-pin" style="background: linear-gradient(135deg, #ff4e50, #f9d423);">
+                        <img src="21.jpeg" class="pin-photo" alt="Finale">
+                    </div>
+                    <div class="pin-label" style="color: #f9d423; font-weight: bold;">Grand Finale 💌</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP CARD MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-card">
+            <img id="modalImg" src="" alt="Memory Image">
+            <div class="card-title" id="modalTitle">Memory Title</div>
+            <div class="card-text" id="modalText">Memory description text...</div>
+            <div class="modal-buttons">
+                <button class="close-btn" id="modalCloseBtn" onclick="closeMemory()">Close Surprise ✨</button>
+                <button class="replay-btn" id="replayBtn" onclick="resetJourney()">Replay Memory Road 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let runesUnlocked = 0;
+        const totalRunes = 7;
+        let isAudioPlaying = false;
+        let currentUnlockedPin = 1;
+        let isCarDriving = false;
+
+        const audio = document.getElementById('bgSong');
+        const audioIcon = document.getElementById('audioIcon');
+
+        // Path progress percentages along the SVG line
+        const pinProgress = {
+            1: 0.00,
+            2: 0.28,
+            3: 0.52,
+            4: 0.77,
+            5: 1.00
+        };
+
+        const memories = {
+            1: {
+                img: "3.png",
+                title: "Where It All Began 📸",
+                text: "Every great journey starts with a single step and a beautiful smile!"
+            },
+            2: {
+                img: "1.jpeg",
+                title: "Unforgettable Adventures 🌟",
+                text: "Exploring new places and creating core memories that last forever."
+            },
+            3: {
+                img: "21.jpeg",
+                title: "Pure Joy & Laughter 😄",
+                text: "The moments that filled our days with genuine happiness and warmth."
+            },
+            4: {
+                img: "4.jpeg",
+                title: "Secret Surprise Box 🎁",
+                text: "Life is full of little unexpected blessings, just like you!"
+            },
+            5: {
+                img: "21.jpeg",
+                title: "Dear Nandini, 💌",
+                text: "Thank you for bringing endless brightness, laughter, and magic into my life. Here's to infinitely more wonderful moments together! ✨💖"
+            }
+        };
+
+        function startAudio() {
+            if (!isAudioPlaying) {
+                audio.play().then(() => {
+                    isAudioPlaying = true;
+                    audioIcon.textContent = '🎶';
+                }).catch(() => {});
+            }
+        }
+
+        function toggleAudio() {
+            if (audio.paused) {
+                audio.play();
+                isAudioPlaying = true;
+                audioIcon.textContent = '🎶';
+            } else {
+                audio.pause();
+                isAudioPlaying = false;
+                audioIcon.textContent = '🎵';
+            }
+        }
+
+        function unlockRune(el, letter) {
+            startAudio();
+            if (el.classList.contains('active')) return;
+
+            el.textContent = letter;
+            el.classList.add('active');
+            runesUnlocked++;
+            spawnParticles(el);
+
+            if (runesUnlocked === totalRunes) {
+                setTimeout(() => {
+                    document.getElementById('launchBtn').classList.add('ready');
+                }, 300);
+            }
+        }
+
+        function spawnParticles(el) {
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 15; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.width = p.style.height = (4 + Math.random() * 5) + 'px';
+                p.style.background = '#d4af37';
+                p.style.left = cx + 'px';
+                p.style.top = cy + 'px';
+
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 40 + Math.random() * 50;
+                p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+                p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 800);
+            }
+        }
+
+        function startJourney() {
+            startAudio();
+            document.getElementById('stage-intro').classList.add('fade-out');
+            setTimeout(() => {
+                document.getElementById('stage-map').classList.add('active');
+                positionCarAtProgress(0);
+            }, 600);
+        }
+
+        function positionCarAtProgress(progress) {
+            const path = document.getElementById('roadPath');
+            const totalLen = path.getTotalLength();
+            const currentLen = progress * totalLen;
+            
+            const pt = path.getPointAtLength(currentLen);
+            const aheadLen = Math.min(currentLen + 2, totalLen);
+            const ptAhead = path.getPointAtLength(aheadLen);
+            
+            const dx = ptAhead.x - pt.x;
+            const dy = ptAhead.y - pt.y;
+            const angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
+
+            const car = document.getElementById('journey-car');
+            car.style.left = pt.x + 'px';
+            car.style.top = pt.y + 'px';
+            car.style.transform = `rotate(${angleDeg}deg) scaleX(-1)`;
+
+            const scrollArea = document.getElementById('scrollArea');
+            scrollArea.scrollLeft = pt.x - scrollArea.clientWidth / 2;
+        }
+
+        function driveCarToPin(targetPin, callback) {
+            isCarDriving = true;
+            const startProgress = pinProgress[targetPin - 1] || 0;
+            const endProgress = pinProgress[targetPin];
+
+            let startTime = null;
+            const duration = 4000; // 4 seconds drive duration
+
+            function animateCar(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                const pct = Math.min(elapsed / duration, 1);
+                
+                const easePct = pct < 0.5 ? 2 * pct * pct : -1 + (4 - 2 * pct) * pct;
+                const currentProgress = startProgress + (endProgress - startProgress) * easePct;
+
+                positionCarAtProgress(currentProgress);
+
+                if (pct < 1) {
+                    requestAnimationFrame(animateCar);
+                } else {
+                    isCarDriving = false;
+                    if (callback) callback();
+                }
+            }
+
+            requestAnimationFrame(animateCar);
+        }
+
+        function handlePinTap(id, event) {
+            startAudio();
+
+            if (document.getElementById(`pin-${id}`).classList.contains('locked') || isCarDriving) return;
+
+            openMemory(id, event);
+        }
+
+        function triggerSmallConfetti(e) {
+            const x = e ? e.clientX / window.innerWidth : 0.5;
+            const y = e ? e.clientY / window.innerHeight : 0.5;
+
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { x: x, y: y },
+                colors: ['#d4af37', '#f3e5ab', '#ffffff', '#ff4e50']
+            });
+        }
+
+        function triggerGrandConfetti() {
+            const count = 300;
+            const defaults = { origin: { y: 0.6 } };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, { spread: 35, startVelocity: 60, colors: ['#d4af37', '#f3e5ab'] });
+            fire(0.2, { spread: 80, colors: ['#ffffff', '#ff4e50'] });
+            fire(0.35, { spread: 120, decay: 0.91, scalar: 0.9 });
+            fire(0.1, { spread: 140, startVelocity: 30, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 140, startVelocity: 50 });
+        }
+
+        function openMemory(id, event) {
+            const data = memories[id];
+            const imgEl = document.getElementById('modalImg');
+            
+            if (data.img) {
+                imgEl.src = data.img;
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.style.display = 'none';
+            }
+
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalText').textContent = data.text;
+            
+            const replayBtn = document.getElementById('replayBtn');
+            if (id === 5) {
+                replayBtn.style.display = 'block';
+                triggerGrandConfetti();
+            } else {
+                replayBtn.style.display = 'none';
+                triggerSmallConfetti(event);
+            }
+
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeMemory() {
+            document.getElementById('modalOverlay').classList.remove('active');
+
+            if (currentUnlockedPin < 5) {
+                currentUnlockedPin++;
+                const nextPinEl = document.getElementById(`pin-${currentUnlockedPin}`);
+                
+                setTimeout(() => {
+                    driveCarToPin(currentUnlockedPin, () => {
+                        nextPinEl.classList.remove('locked');
+                        
+                        if (currentUnlockedPin === 5) {
+                            triggerGrandConfetti();
+                        } else {
+                            triggerSmallConfetti();
+                        }
+                        
+                        setTimeout(() => {
+                            openMemory(currentUnlockedPin);
+                        }, 500);
+                    });
+                }, 400);
+            }
+        }
+
+        function resetJourney() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            
+            currentUnlockedPin = 1;
+            for (let i = 2; i <= 5; i++) {
+                document.getElementById(`pin-${i}`).classList.add('locked');
+            }
+            
+            positionCarAtProgress(0);
+        }
+    </script>
+</body>
+</html>
